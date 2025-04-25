@@ -119,8 +119,25 @@ let token_of_str str =
   | _ -> None
 ;;
 
+let read_file path =
+  try
+    let content = In_channel.with_open_text path In_channel.input_all in
+    Some content
+  with
+  | _ -> None
+;;
+
+let token_of_file path =
+  match read_file path with
+  | Some str -> token_of_str str
+  | None -> None
+;;
+
 let () =
-  match token_of_str "[ 12312  ,  31231 , 12.3 \t, 2, \" \t . adasdasda\" ]" with
-  | Some _ -> print_endline "accepted"
-  | None -> print_endline "rejected"
+  match Array.to_list Sys.argv with
+  | [] | [ _ ] -> print_endline "path = ?"
+  | _ :: path :: _ ->
+    (match token_of_file path with
+     | Some _ -> print_endline "accepted"
+     | None -> print_endline "rejected")
 ;;

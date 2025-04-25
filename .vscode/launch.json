@@ -11,6 +11,7 @@
       "stopOnEntry": true,
       "console": "integratedTerminal",
       "program": "${workspaceFolder}/_build/default/bin/main.bc",
+      "arguments": ["${workspaceFolder}/_build/default/bin/main.ml"],
       "onlyDebugGlob": "<${workspaceFolder}/**/*>",
       "yieldSteps": 1024,
       "cwd": "${workspaceFolder}"
