@@ -1,0 +1,5 @@
+(executable
+ (public_name jparser)
+ (name main)
+ (libraries jparser)
+ (modes byte exe))
