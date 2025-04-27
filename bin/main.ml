@@ -1,12 +1,16 @@
+let ( let* ) = Option.bind
+
 type number =
   | Int of int
   | Float of float
+[@@deriving show]
 
 type token =
   | Whitespace of string
   | Number of number
   | String of string
   | Array of token list
+[@@deriving show]
 
 module Scanners = struct
   let whitespace state stack _ = function
@@ -69,11 +73,9 @@ let convert str acc = function
   | `String -> String str
   | `Whitespace -> Whitespace str
   | `Number ->
-    (match float_of_string_opt str with
-     | Some x -> Number (Float x)
-     | None ->
-       let x = int_of_string str in
-       Number (Int x))
+    (match int_of_string_opt str with
+     | Some x -> Number (Int x)
+     | None -> Number (Float (float_of_string str)))
 ;;
 
 let char_at str pos =
@@ -92,13 +94,10 @@ let rec scan str start_pos target scanner =
     | `Position pos, stack -> go str pos scanner state stack
     | state, stack -> go str (pos + 1) scanner state stack
   in
-  match go str start_pos scanner `Start [] with
-  | None -> None
-  | Some (pos, stack) ->
-    let len = pos - start_pos in
-    let str = String.sub str start_pos len in
-    let token = convert str stack target in
-    Some (pos, token)
+  let* pos, stack = go str start_pos scanner `Start [] in
+  let scanned_str = String.sub str start_pos (pos - start_pos) in
+  let token = convert scanned_str (List.rev stack) target in
+  Some (pos, token)
 
 and parse str start_pos =
   let scan_with (target, scanner) = scan str start_pos target scanner in
@@ -128,9 +127,8 @@ let read_file path =
 ;;
 
 let token_of_file path =
-  match read_file path with
-  | Some str -> token_of_str str
-  | None -> None
+  let* content = read_file path in
+  token_of_str content
 ;;
 
 let () =
@@ -138,6 +136,6 @@ let () =
   | [] | [ _ ] -> print_endline "path = ?"
   | _ :: path :: _ ->
     (match token_of_file path with
-     | Some _ -> print_endline "accepted"
-     | None -> print_endline "rejected")
+     | Some token -> print_endline @@ show_token token
+     | None -> print_endline "invalid token")
 ;;

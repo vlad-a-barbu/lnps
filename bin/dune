@@ -1,5 +1,6 @@
 (executable
  (public_name jparser)
  (name main)
+ (preprocess(pps ppx_deriving.show))
  (libraries jparser)
  (modes byte exe))
